@@ -1,54 +1,26 @@
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
 public class Client
 {
-	Socket socket;
-	ObjectOutputStream out;
-	ObjectInputStream in;
-	String message;
-	Scanner input;
-
-	public static void main(String args[])
-	{
-		System.out.println("\n\n-- Client --\n\n");
-
-		// Create and run the client
-		Client client = new Client();
-		client.run();
-	}
+	private Socket socket;
 
 	Client()
 	{
-		input = new Scanner(System.in);
 	}
 
 	void run()
 	{
+		ObjectOutputStream out = null;
+		ObjectInputStream in = null;
+
+		// Create the socket we use to connect to the server
+		socket = new Socket();
+
+		handleConnectionLoop();
+
 		try
 		{
-			// 1. creating a socket to connect to the server
-			socket = new Socket();
-
-			// This was not done in the class just something i add that will make it so if
-			// you launch the client first it wont crash if ther server is not running
-			int count = 1;
-			while (!socket.isConnected())
-			{
-				try
-				{
-					socket.connect(new InetSocketAddress("localhost", 2004), 500);
-				}
-				catch (Exception e)
-				{
-				}
-
-				Thread.sleep(1000);
-				System.out.println("Reconnection Attempt - " + count);
-				count++;
-			}
-
 			System.out.println("Connected to localhost in port 2004");
 
 			// 2. get Input and Output streams
@@ -56,7 +28,12 @@ public class Client
 			out.flush();
 			in = new ObjectInputStream(socket.getInputStream());
 
-			handleLogic();
+			MessageHandler message = new MessageHandler(out, in);
+			ClientLogic logic = new ClientLogic(message);
+			while (true)
+			{
+				logic.Run();
+			}
 		}
 		catch (UnknownHostException unknownHost)
 		{
@@ -81,84 +58,45 @@ public class Client
 		}
 	}
 
-	private void handleLogic() throws UnknownHostException, IOException, Exception
+	private void handleConnectionLoop()
 	{
-		while (true)
-		{
-			// Handle the add or multiply request
-			handleRequest();
+		int count = 0;
 
-			// Change the way we handle the incoming messages from the server
-			if (message.equalsIgnoreCase("1"))
+		// Run a loop trying to connect to server
+		do
+		{
+			try
 			{
-				handleAdd();
+				socket.connect(new InetSocketAddress("localhost", 2004), 500);
 			}
-			else if (message.equalsIgnoreCase("2"))
+			catch (Exception e)
 			{
-				handleMul();
 			}
 
-			// Handle the quit request
-			handleRequest();
-
-			if (message.equalsIgnoreCase("yes"))
+			if (count > 0)
 			{
-				break;// close out of the connection and the infinite loop
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+
+				System.out.println("Reconnection Attempt - " + count);
 			}
-		}
+
+			count++;
+		} while (!socket.isConnected());
 	}
 
-	private void handleRequest() throws Exception
+	public static void main(String args[])
 	{
-		readResponse();
-		sendInput();
-	}
+		System.out.println("\n\n-- Client --\n\n");
 
-	private void handleAdd() throws Exception
-	{
-		for (int i = 1; i <= 3; i++)
-		{
-			handleRequest();
-		}
-
-		// Read Result response
-		readResponse();
-	}
-
-	private void sendInput()
-	{
-		message = input.nextLine();
-		sendMessage(message);
-	}
-
-	private void readResponse() throws Exception
-	{
-		message = (String) in.readObject();
-		System.out.println(message);
-	}
-
-	private void handleMul() throws Exception
-	{
-		for (int i = 1; i <= 2; i++)
-		{
-			handleRequest();
-		}
-
-		// Read Result response
-		readResponse();
-	}
-
-	void sendMessage(String msg)
-	{
-		try
-		{
-			out.writeObject(msg);
-			out.flush();
-			System.out.println("client>" + msg);
-		}
-		catch (IOException ioException)
-		{
-			ioException.printStackTrace();
-		}
+		// Create and run the client
+		Client client = new Client();
+		client.run();
 	}
 }
