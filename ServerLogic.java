@@ -7,11 +7,13 @@ public class ServerLogic
 
     private final String OptionsMin = "1. Register\n2. Login\n";
     private final String OptionsFull = OptionsMin + "3. Add Bug\n4. Assign Bug\n5. View all Bugs\n6. Update bug\n";
-    private final String WelcomeMessage = "\n\nWelcome to the Bug Tracker\nplease enter the number for the\nmenu you wish to access\n";
+    private final String WelcomeMessageStart = "\n\nWelcome to the Bug Tracker";
+    private final String WelcomeMessageEnd = "\nplease enter the number for the\nmenu you wish to access\n";
 
     private Collection<User> users = new ArrayList<>();
 
-    Boolean loggedin = false;
+    private Boolean loggedin = false;
+    private String name = "";
 
     public ServerLogic(MessageHandler message)
     {
@@ -21,14 +23,31 @@ public class ServerLogic
     // All the server logic
     public void run()
     {
-        // Send Welcome Message
-        message.sendString(WelcomeMessage);
+        // 1. Send Welcome Message
+        message.sendString(WelcomeMessageStart + name + WelcomeMessageEnd);
 
-        // Menu options List 1-2
-        message.sendString(OptionsMin + "\nInput number 1-2");
+        // 2. Menu options List 1-2
+        if (loggedin)
+        {
+            message.sendString(OptionsFull + "\nInput number 1-6");
+        }
+        else
+        {
+            message.sendString(OptionsMin + "\nInput number 1-2");
+        }
 
-        // Send a request to the client asking to choose a menu option
+        // 3. Send a request to the client asking to choose a menu option
         int menuOption = message.requestNumber("> ");
+
+        // 4. Send bool if error
+        if (menuOption < 1 || menuOption > (loggedin ? 6 : 2))
+        {
+            System.out.println("Error");
+            message.sendBoolean(true);// Error send client back to start
+            return;
+        }
+        message.sendBoolean(false);// No Error
+
         handleMenu(menuOption);
     }
 
@@ -61,7 +80,7 @@ public class ServerLogic
 
     private void login()
     {
-        Boolean validLogin = true;
+        Boolean validLogin = false;
 
         do
         {
@@ -72,12 +91,15 @@ public class ServerLogic
             {
                 if (email.equalsIgnoreCase(user.getEmail()))
                 {
-                    validLogin = false;
+                    name = " " + user.getName();
+                    validLogin = true;
+                    loggedin = true;
                 }
             }
-            message.sendBoolean(validLogin);
-        } while (!validLogin);
 
+            message.sendBoolean(validLogin);
+
+        } while (!validLogin);
     }
 
     private void register()

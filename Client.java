@@ -71,6 +71,7 @@ public class Client
 			}
 			catch (Exception e)
 			{
+				e.printStackTrace();
 			}
 
 			if (count > 0)

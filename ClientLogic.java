@@ -10,14 +10,23 @@ public class ClientLogic
     // All the server logic
     public void Run()
     {
-        // Print Welcome Message
+        // 1. Print Welcome Message
         System.out.println(message.readString());
 
-        // Print Menu List 1-2
+        // 2. Print Menu List 1-2
         System.out.println(message.readString());
 
-        // Handle Menu on client
+        // 3. Handle Menu on client
         int menuOption = message.handleRequestNumber();
+
+        // 4. User send
+        Boolean error = message.readBoolean();
+        System.out.println(error);
+        if (error)
+        {
+            return;
+        }
+
         handleMenu(menuOption);
     }
 
@@ -50,12 +59,14 @@ public class ClientLogic
 
     private void login()
     {
+        Boolean validLogin = false;
+
         do
         {
             System.out.println(message.readString());
             message.handleRequestString();// Respond to email request
-
-        } while (message.readBoolean());
+            validLogin = message.readBoolean();
+        } while (!validLogin);
     }
 
     private void registration()
