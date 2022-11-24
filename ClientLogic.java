@@ -10,22 +10,14 @@ public class ClientLogic
     // All the server logic
     public void Run()
     {
-        // 1. Print Welcome Message
+        // 0.1. Print Welcome Message
         System.out.println(message.readString());
 
-        // 2. Print Menu List 1-2
+        // 0.2. Print Menu List
         System.out.println(message.readString());
 
-        // 3. Handle Menu on client
-        int menuOption = message.handleRequestNumber();
-
-        // 4. User send
-        Boolean error = message.readBoolean();
-        System.out.println(error);
-        if (error)
-        {
-            return;
-        }
+        // 0.3. Handle Menu on client
+        int menuOption = message.handleRequestRangedNumber();
 
         handleMenu(menuOption);
     }
@@ -35,7 +27,7 @@ public class ClientLogic
         switch (menuOption)
         {
         case 1:
-            registration();
+            register();
             break;
 
         case 2:
@@ -43,6 +35,7 @@ public class ClientLogic
             break;
 
         case 3:
+            addBug();
             break;
 
         case 4:
@@ -57,23 +50,39 @@ public class ClientLogic
         }
     }
 
+    private void addBug()
+    {
+        message.handleRequestString(); // 3.1. AppName
+        message.handleRequestString(); // 3.2. DateTime
+        message.handleRequestRangedNumber(); // 3.3. Platform
+        message.handleRequestString(); // 3.4. Description
+        message.handleRequestNumber(); // 3.5. Status
+    }
+
     private void login()
     {
         Boolean validLogin = false;
 
         do
         {
+            // 1.1. Recieve text to login
             System.out.println(message.readString());
-            message.handleRequestString();// Respond to email request
+
+            // 1.2. Recieve request for email Prompt
+            message.handleRequestString();
+
+            // 1.3. Recieve error if we sent an invalid input
             validLogin = message.readBoolean();
         } while (!validLogin);
     }
 
-    private void registration()
+    private void register()
     {
-        message.handleRequestString(); // Name
-        message.handleRequestNumber(); // ID
-        message.handleRequestString(); // Email
-        message.handleRequestString(); // Department
+        message.handleRequestString(); // 2.1. Name
+        message.handleRequestNumber(); // 2.1. ID
+        message.handleRequestString(); // 2.1. Email
+        message.handleRequestString(); // 2.1. Department
+
+        System.out.println(message.readString());
     }
 }

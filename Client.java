@@ -1,5 +1,9 @@
-import java.io.*;
-import java.net.*;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Client
 {
@@ -15,9 +19,14 @@ public class Client
 		ObjectInputStream in = null;
 
 		// Create the socket we use to connect to the server
-		socket = new Socket();
-
-		handleConnectionLoop();
+		try
+		{
+			socket = new Socket("127.0.0.1", 2004);
+		}
+		catch (IOException e1)
+		{
+			e1.printStackTrace();
+		}
 
 		try
 		{
@@ -58,43 +67,18 @@ public class Client
 		}
 	}
 
-	private void handleConnectionLoop()
-	{
-		int count = 0;
-
-		// Run a loop trying to connect to server
-		do
-		{
-			try
-			{
-				socket.connect(new InetSocketAddress("localhost", 2004), 500);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-
-			if (count > 0)
-			{
-				try
-				{
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-
-				System.out.println("Reconnection Attempt - " + count);
-			}
-
-			count++;
-		} while (!socket.isConnected());
-	}
-
 	public static void main(String args[])
 	{
 		System.out.println("\n\n-- Client --\n\n");
+
+		try
+		{
+			Thread.sleep(250);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 
 		// Create and run the client
 		Client client = new Client();

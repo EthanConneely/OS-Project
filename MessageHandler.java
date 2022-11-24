@@ -1,7 +1,10 @@
-import java.io.IOException;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Scanner;
+
+import Database.Platform;
+import Database.Status;
 
 public class MessageHandler
 {
@@ -16,38 +19,6 @@ public class MessageHandler
         scanner = new Scanner(System.in);
     }
 
-    public int requestNumber(String prompt)
-    {
-        sendString(prompt);
-        return readNumber();
-    }
-
-    public String requestString(String prompt)
-    {
-        sendString(prompt);
-        return readString();
-    }
-
-    public int handleRequestNumber()
-    {
-        System.out.print(readString());
-        int response = Integer.parseInt(scanner.nextLine());
-        sendNumber(response);
-        return response;
-    }
-
-    /**
-     *
-     * @return What the user has input that is sent over the network
-     */
-    public String handleRequestString()
-    {
-        System.out.print(readString());
-        String response = scanner.nextLine();
-        sendString(response);
-        return response;
-    }
-
     /**
      * Send String over the network
      */
@@ -58,7 +29,7 @@ public class MessageHandler
             out.writeObject(msg);
             out.flush();
         }
-        catch (IOException ioException)
+        catch (Exception ioException)
         {
             ioException.printStackTrace();
         }
@@ -74,7 +45,7 @@ public class MessageHandler
             out.writeObject(msg);
             out.flush();
         }
-        catch (IOException ioException)
+        catch (Exception ioException)
         {
             ioException.printStackTrace();
         }
@@ -90,7 +61,7 @@ public class MessageHandler
             out.writeObject(msg);
             out.flush();
         }
-        catch (IOException ioException)
+        catch (Exception ioException)
         {
             ioException.printStackTrace();
         }
@@ -105,11 +76,7 @@ public class MessageHandler
         {
             return (String) in.readObject();
         }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -126,11 +93,7 @@ public class MessageHandler
         {
             return (int) in.readObject();
         }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -139,7 +102,7 @@ public class MessageHandler
     }
 
     /**
-     * Read the boolean sent over the network
+     * Read a bool sent over the network
      */
     public Boolean readBoolean()
     {
@@ -147,11 +110,7 @@ public class MessageHandler
         {
             return (Boolean) in.readObject();
         }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -159,4 +118,94 @@ public class MessageHandler
         return false;
     }
 
+    public int requestNumber(String prompt)
+    {
+        sendString(prompt);
+        return readNumber();
+    }
+
+    public String requestString(String prompt)
+    {
+        sendString(prompt);
+        return readString();
+    }
+
+    /**
+     * Requests a number in a range rerequesting it if the user sends a wrong number
+     *
+     * @param min    Range inclusive
+     * @param max    Range inclusive
+     * @param prompt The prompt to show the client
+     * @return Returns only the valid number the user has sent back
+     */
+    public int requestRangedNumber(int min, int max, String prompt)
+    {
+        int menuOption = -1;
+        Boolean invalidInput = true;
+        while (invalidInput)
+        {
+            menuOption = requestNumber(prompt);
+
+            invalidInput = menuOption < min || menuOption > max;
+            System.out.println(invalidInput);
+            sendBoolean(invalidInput);
+        }
+        return menuOption;
+    }
+
+    public int handleRequestRangedNumber()
+    {
+        int menuOption = 0;
+        do
+        {
+            menuOption = handleRequestNumber();
+
+            // 0.4. Check bool for error
+        } while (readBoolean());
+        return menuOption;
+    }
+
+    public int handleRequestNumber()
+    {
+        System.out.print(readString());
+
+        int response;
+        try
+        {
+            response = Integer.parseInt(scanner.nextLine());
+        }
+        catch (Exception e)
+        {
+            response = -1;
+        }
+        sendNumber(response);
+        return response;
+    }
+
+    /**
+     *
+     * @return What the user has input that is sent over the network
+     */
+    public String handleRequestString()
+    {
+        System.out.print(readString());
+
+        String response = scanner.nextLine();
+        sendString(response);
+        return response;
+    }
+
+    public Platform handleRequestPlatformEnum()
+    {
+        System.out.print(readString());
+
+        return Platform.valueOf(readString());
+    }
+
+    public Status handleRequestStatusEnum()
+    {
+        System.out.print(readString());
+
+        return Status.valueOf(readString());
+    }
 }

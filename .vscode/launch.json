@@ -5,22 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "java",
             "name": "Launch Client",
+            "type": "java",
             "request": "launch",
-            "mainClass": "Client",
-            "presentation": {
-                "hidden": true,
-            }
+            "mainClass": "Client"
         },
         {
-            "type": "java",
             "name": "Launch Server",
+            "type": "java",
             "request": "launch",
             "mainClass": "Server",
-            "presentation": {
-                "hidden": true,
-            }
         }
     ],
     "compounds": [
