@@ -1,3 +1,4 @@
+import java.net.Socket;
 import java.time.LocalDateTime;
 
 import Database.Database;
@@ -5,7 +6,7 @@ import Database.Platform;
 import Database.Status;
 import Database.User;
 
-public class ServerLogic
+public class ServerLogic extends Thread
 {
     private MessageHandler message;
 
@@ -14,49 +15,51 @@ public class ServerLogic
     private final String WelcomeMessageStart = "\n\nWelcome to the Bug Tracker";
     private final String WelcomeMessageEnd = "\nPlease enter the number for the\nmenu you wish to access\n";
 
-    private Database database = new Database();
+    private Database database;
 
     private Boolean loggedIn = false;
     private Boolean showWelcomeMessage = true;
     private String name = "";
 
-    public ServerLogic(MessageHandler message)
+    public ServerLogic(Socket socket, Database database)
     {
-        this.message = message;
+        this.message = new MessageHandler(socket);
+        this.database = database;
     }
 
-    /**
-     * All the server logic
-     */
-    public void Run()
+    @Override
+    public void run()
     {
-        // 0.1. Send Welcome Message
-        if (showWelcomeMessage)
+        while (true)
         {
-            message.sendString(WelcomeMessageStart + name + WelcomeMessageEnd);
-        }
-        else
-        {
-            message.sendString("");
-        }
+            // 0.1. Send Welcome Message
+            if (showWelcomeMessage)
+            {
+                message.sendString(WelcomeMessageStart + name + WelcomeMessageEnd);
+            }
+            else
+            {
+                message.sendString("");
+            }
 
-        showWelcomeMessage = false;
+            showWelcomeMessage = false;
 
-        // 0.2. Menu options List depending on if client is logged in
-        if (loggedIn)
-        {
-            message.sendString(OptionsFull);
+            // 0.2. Menu options List depending on if client is logged in
+            if (loggedIn)
+            {
+                message.sendString(OptionsFull);
+            }
+            else
+            {
+                message.sendString(OptionsMin);
+            }
+
+            // 0.3. Send a request to the client asking to choose a menu option
+            int max = loggedIn ? 6 : 2;
+            int menuOption = message.requestNumberRange(1, max, "1-" + max + "> ");
+
+            handleMenu(menuOption);
         }
-        else
-        {
-            message.sendString(OptionsMin);
-        }
-
-        // 0.3. Send a request to the client asking to choose a menu option
-        int max = loggedIn ? 6 : 2;
-        int menuOption = message.requestRangedNumber(1, max, "1-" + max + "> ");
-
-        handleMenu(menuOption);
     }
 
     private void handleMenu(int menuOption)
@@ -90,10 +93,15 @@ public class ServerLogic
     private void addBug()
     {
         String appName = message.requestString("AppName: ");// 3.1. AppName
-        LocalDateTime dateTime = LocalDateTime.parse(message.requestString("DateTime(e.g. 2007-12-27T10:15:30): "));// 3.2. DateTime
-        Platform platform = Platform.values()[message.requestRangedNumber(0, 2, "Platform (0=Windows, 1=Mac, 2=Unix): ")];// 3.3. Platform
+
+        String dateText = message.requestString("DateTime(e.g. 2007-12-27T10:15:30): ");// 3.2. DateTime
+        LocalDateTime dateTime = LocalDateTime.parse(dateText);
+
+        Platform platform = Platform.values()[message.requestNumberRange(0, 2, "Platform (0=Windows, 1=Mac, 2=Unix): ")];// 3.3. Platform
+
         String description = message.requestString("Description: ");// 3.4. Description
-        Status status = Status.values()[message.requestRangedNumber(0, 2, "Status (0=Open, 1=Closed, 2=Assigned): ")]; // 3.5. Status
+
+        Status status = Status.values()[message.requestNumberRange(0, 2, "Status (0=Open, 1=Closed, 2=Assigned): ")]; // 3.5. Status
 
         database.addBug(appName, dateTime, platform, description, status);
     }
@@ -110,9 +118,12 @@ public class ServerLogic
             // 1.2. Send request for email Prompt
             var email = message.requestString("Email: ");
 
+            // 1.3. Send request for email Prompt
+            var id = message.requestNumberRange(0, Integer.MAX_VALUE, "ID: ");
+
             for (User user : database.getUsers())
             {
-                if (email.equalsIgnoreCase(user.Email()))
+                if (email.equalsIgnoreCase(user.Email()) && id == user.Id())
                 {
                     name = " " + user.Name();
                     validLogin = true;
@@ -121,7 +132,7 @@ public class ServerLogic
                 }
             }
 
-            // 1.3. Send error if client sent an invalid input
+            // 1.4. Send error if client sent an invalid input
             message.sendBoolean(validLogin);
 
         } while (!validLogin);

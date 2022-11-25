@@ -17,7 +17,7 @@ public class ClientLogic
         System.out.println(message.readString());
 
         // 0.3. Handle Menu on client
-        int menuOption = message.handleRequestRangedNumber();
+        int menuOption = message.handleRequestNumberRange();
 
         handleMenu(menuOption);
     }
@@ -53,17 +53,17 @@ public class ClientLogic
     private void addBug()
     {
         message.handleRequestString(); // 3.1. AppName
-        message.handleRequestString(); // 3.2. DateTime
-        message.handleRequestRangedNumber(); // 3.3. Platform
+        message.handleRequestDate(); // 3.2. DateTime
+        message.handleRequestNumberRange(); // 3.3. Platform
         message.handleRequestString(); // 3.4. Description
-        message.handleRequestNumber(); // 3.5. Status
+        message.handleRequestNumberRange(); // 3.5. Status
     }
 
     private void login()
     {
         Boolean validLogin = false;
 
-        do
+        while (!validLogin)
         {
             // 1.1. Recieve text to login
             System.out.println(message.readString());
@@ -71,9 +71,12 @@ public class ClientLogic
             // 1.2. Recieve request for email Prompt
             message.handleRequestString();
 
-            // 1.3. Recieve error if we sent an invalid input
+            // 1.3. Recieve request for ID Prompt
+            message.handleRequestNumberRange();
+
+            // 1.4. Recieve error if we sent an invalid input
             validLogin = message.readBoolean();
-        } while (!validLogin);
+        }
     }
 
     private void register()

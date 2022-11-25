@@ -22,7 +22,8 @@
             "name": "Server & Client",
             "configurations": [
                 "Launch Server",
-                "Launch Client"
+                "Launch Client",
+                "Launch Client",
             ],
             "stopAll": true,
             "presentation": {

@@ -21,7 +21,7 @@ public class Database
     /**
      * @return all the users
      */
-    public Collection<User> getUsers()
+    public synchronized Collection<User> getUsers()
     {
         return users;
     }
@@ -29,7 +29,7 @@ public class Database
     /**
      * @return all the bugs
      */
-    public Map<UUID, Bug> getBugs()
+    public synchronized Map<UUID, Bug> getBugs()
     {
         return bugs;
     }
@@ -43,7 +43,7 @@ public class Database
      * @param department New Clients department
      * @return False if it had an error adding the user
      */
-    public Boolean addUser(String name, int id, String email, String department)
+    public synchronized Boolean addUser(String name, int id, String email, String department)
     {
         User newUser = new User(name, id, email, department);
 
@@ -72,7 +72,7 @@ public class Database
         return false;
     }
 
-    public void addBug(String AppName, LocalDateTime DateTime, Platform Platform, String Description, Status Status)
+    public synchronized void addBug(String AppName, LocalDateTime DateTime, Platform Platform, String Description, Status Status)
     {
         Bug newBug = new Bug(AppName, DateTime, Platform, Description, Status);
 

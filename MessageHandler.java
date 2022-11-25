@@ -1,6 +1,8 @@
-
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import Database.Platform;
@@ -12,10 +14,19 @@ public class MessageHandler
     private ObjectInputStream in;
     private Scanner scanner;
 
-    public MessageHandler(ObjectOutputStream out, ObjectInputStream in)
+    public MessageHandler(Socket socket)
     {
-        this.out = out;
-        this.in = in;
+        try
+        {
+            this.out = new ObjectOutputStream(socket.getOutputStream());
+            this.out.flush();
+            this.in = new ObjectInputStream(socket.getInputStream());
+        }
+        catch (IOException e)
+        {
+            System.out.println("MessageHandler Wrong Object Read");
+        }
+
         scanner = new Scanner(System.in);
     }
 
@@ -31,7 +42,7 @@ public class MessageHandler
         }
         catch (Exception ioException)
         {
-            ioException.printStackTrace();
+            System.out.println("sendString Wrong Object Read");
         }
     }
 
@@ -47,7 +58,7 @@ public class MessageHandler
         }
         catch (Exception ioException)
         {
-            ioException.printStackTrace();
+            System.out.println("sendNumber Wrong Object Read");
         }
     }
 
@@ -63,7 +74,7 @@ public class MessageHandler
         }
         catch (Exception ioException)
         {
-            ioException.printStackTrace();
+            System.out.println("sendBoolean Wrong Object Read");
         }
     }
 
@@ -78,7 +89,7 @@ public class MessageHandler
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            System.out.println("readString " + e.getMessage());
         }
 
         return "";
@@ -95,7 +106,7 @@ public class MessageHandler
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            System.out.println("readNumber Wrong Object Read");
         }
 
         return -1;
@@ -112,7 +123,7 @@ public class MessageHandler
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            System.out.println("readBoolean Wrong Object Read");
         }
 
         return false;
@@ -130,6 +141,28 @@ public class MessageHandler
         return readString();
     }
 
+    public String requestDate(String prompt)
+    {
+        String result = "";
+        Boolean invalidInput = true;
+        while (invalidInput)
+        {
+            result = requestString(prompt);
+
+            invalidInput = false;
+            try
+            {
+                LocalDateTime.parse(result);
+            }
+            catch (Exception e)
+            {
+                invalidInput = true;
+            }
+            sendBoolean(invalidInput);
+        }
+        return result;
+    }
+
     /**
      * Requests a number in a range rerequesting it if the user sends a wrong number
      *
@@ -138,31 +171,43 @@ public class MessageHandler
      * @param prompt The prompt to show the client
      * @return Returns only the valid number the user has sent back
      */
-    public int requestRangedNumber(int min, int max, String prompt)
+    public int requestNumberRange(int min, int max, String prompt)
     {
-        int menuOption = -1;
+        int result = -1;
         Boolean invalidInput = true;
         while (invalidInput)
         {
-            menuOption = requestNumber(prompt);
+            result = requestNumber(prompt);
 
-            invalidInput = menuOption < min || menuOption > max;
-            System.out.println(invalidInput);
+            invalidInput = result < min || result > max;
+
             sendBoolean(invalidInput);
         }
-        return menuOption;
+        return result;
     }
 
-    public int handleRequestRangedNumber()
+    public int handleRequestNumberRange()
     {
-        int menuOption = 0;
+        int result = 0;
         do
         {
-            menuOption = handleRequestNumber();
+            result = handleRequestNumber();
 
             // 0.4. Check bool for error
         } while (readBoolean());
-        return menuOption;
+        return result;
+    }
+
+    public String handleRequestDate()
+    {
+        String result = "";
+        do
+        {
+            result = handleRequestString();
+
+            // 0.4. Check bool for error
+        } while (readBoolean());
+        return result;
     }
 
     public int handleRequestNumber()
@@ -183,6 +228,7 @@ public class MessageHandler
     }
 
     /**
+     * Request a string from the user
      *
      * @return What the user has input that is sent over the network
      */
