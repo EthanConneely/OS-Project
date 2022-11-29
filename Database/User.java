@@ -1,5 +1,5 @@
 package Database;
 
-public record User(String Name, int Id, String Email, String Department)
+public record User(String name, int id, String email, String department)
 {
 }

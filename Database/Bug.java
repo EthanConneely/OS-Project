@@ -2,6 +2,6 @@ package Database;
 
 import java.time.LocalDateTime;
 
-public record Bug(String AppName, LocalDateTime DateTime, Platform Platform, String Description, Status Status)
+public record Bug(String appName, LocalDateTime dateTime, Platform platform, String description, Status status, Integer userID)
 {
 }

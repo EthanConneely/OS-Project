@@ -1,21 +1,28 @@
 package Database;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class Database
 {
+    private static final String BugsHeader = "--- Bugs ---";
+
     private Collection<User> users = new LinkedList<>();
-    private Map<UUID, Bug> bugs = new HashMap<UUID, Bug>();
+    private Map<Integer, Bug> bugs = new HashMap<Integer, Bug>();
+
+    int nextBugID = 1;
 
     public Database()
     {
-        // For quick debugging
-        users.add(new User("1", 1, "1", "1"));
     }
 
     /**
@@ -29,7 +36,7 @@ public class Database
     /**
      * @return all the bugs
      */
-    public synchronized Map<UUID, Bug> getBugs()
+    public synchronized Map<Integer, Bug> getBugs()
     {
         return bugs;
     }
@@ -50,18 +57,21 @@ public class Database
         for (User user : users)
         {
             // Emails are case insensitive
-            if (newUser.Email().equalsIgnoreCase(user.Email()))
+            if (newUser.email().equalsIgnoreCase(user.email()))
             {
                 return true;
             }
 
-            // Check if the email has a @ and .
-            if (newUser.Email().indexOf("@") == -1 && newUser.Email().indexOf(".") == -1)
+            if (false)
             {
-                return true;
+                // Check if the email has an @ and .
+                if (newUser.email().indexOf("@") == -1 && newUser.email().indexOf(".") == -1)
+                {
+                    return true;
+                }
             }
 
-            if (newUser.Id() == user.Id())
+            if (newUser.id() == user.id())
             {
                 return true;
             }
@@ -74,8 +84,79 @@ public class Database
 
     public synchronized void addBug(String AppName, LocalDateTime DateTime, Platform Platform, String Description, Status Status)
     {
-        Bug newBug = new Bug(AppName, DateTime, Platform, Description, Status);
+        Bug newBug = new Bug(AppName, DateTime, Platform, Description, Status, 0);
 
-        bugs.put(UUID.randomUUID(), newBug);
+        // Make the random number be negative to avoid overlap with the users ids
+        bugs.put(nextBugID, newBug);
+        nextBugID++;
+    }
+
+    public void load()
+    {
+        List<String> lines;
+
+        try
+        {
+            lines = Files.readAllLines(Path.of("./Database.csv"));
+        }
+        catch (IOException e)
+        {
+            return;
+        }
+
+        var linesIter = lines.iterator();
+
+        nextBugID = Integer.parseInt(linesIter.next());
+
+        Boolean readingBugs = false;
+        while (linesIter.hasNext())
+        {
+            String line = linesIter.next();
+            if (line.equalsIgnoreCase(BugsHeader))
+            {
+                readingBugs = true;
+                continue;
+            }
+
+            String[] data = line.split(",");
+
+            if (readingBugs)
+            {
+                var newBug = new Bug(data[1], LocalDateTime.parse(data[2]), Platform.valueOf(data[3]), data[4], Status.valueOf(data[5]), Integer.parseInt(data[6]));
+                bugs.put(Integer.parseInt(data[0]), newBug);
+            }
+            else
+            {
+                var newUser = new User(data[0], Integer.parseInt(data[1]), data[2], data[3]);
+                users.add(newUser);
+            }
+        }
+    }
+
+    public void save()
+    {
+        try (var file = new FileWriter(new File("./Database.csv")))
+        {
+            file.append("" + nextBugID + "\n");
+
+            for (User user : users)
+            {
+                file.append(user.name() + "," + user.id() + "," + user.email() + "," + user.department() + "\n");
+            }
+
+            // Seperator between the data
+            file.append(BugsHeader + "\n");
+
+            for (var data : bugs.entrySet())
+            {
+                var id = data.getKey();
+                var bug = data.getValue();
+                file.append(id + "," + bug.appName() + "," + bug.dateTime() + "," + bug.platform() + "," + bug.description() + "," + bug.status() + "," + bug.userID() + "\n");
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

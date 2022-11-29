@@ -24,7 +24,7 @@ public class MessageHandler
         }
         catch (IOException e)
         {
-            System.out.println("MessageHandler Wrong Object Read");
+            System.out.println("MessageHandler " + e.getMessage());
         }
 
         scanner = new Scanner(System.in);
@@ -40,9 +40,9 @@ public class MessageHandler
             out.writeObject(msg);
             out.flush();
         }
-        catch (Exception ioException)
+        catch (Exception e)
         {
-            System.out.println("sendString Wrong Object Read");
+            System.out.println("sendString " + e.getMessage());
         }
     }
 
@@ -56,25 +56,25 @@ public class MessageHandler
             out.writeObject(msg);
             out.flush();
         }
-        catch (Exception ioException)
+        catch (Exception e)
         {
-            System.out.println("sendNumber Wrong Object Read");
+            System.out.println("sendNumber " + e.getMessage());
         }
     }
 
     /**
      * Send Boolean over the network
      */
-    public void sendBoolean(Boolean msg)
+    public void sendBoolean(Boolean state)
     {
         try
         {
-            out.writeObject(msg);
+            out.writeObject(state);
             out.flush();
         }
-        catch (Exception ioException)
+        catch (Exception e)
         {
-            System.out.println("sendBoolean Wrong Object Read");
+            System.out.println("sendBoolean " + e.getMessage());
         }
     }
 
@@ -106,7 +106,7 @@ public class MessageHandler
         }
         catch (Exception e)
         {
-            System.out.println("readNumber Wrong Object Read");
+            System.out.println("readNumber " + e.getMessage());
         }
 
         return -1;
@@ -123,7 +123,7 @@ public class MessageHandler
         }
         catch (Exception e)
         {
-            System.out.println("readBoolean Wrong Object Read");
+            System.out.println("readBoolean " + e.getMessage());
         }
 
         return false;
@@ -141,7 +141,7 @@ public class MessageHandler
         return readString();
     }
 
-    public String requestDate(String prompt)
+    public LocalDateTime requestDate(String prompt)
     {
         String result = "";
         Boolean invalidInput = true;
@@ -160,7 +160,7 @@ public class MessageHandler
             }
             sendBoolean(invalidInput);
         }
-        return result;
+        return LocalDateTime.parse(result);
     }
 
     /**
@@ -171,7 +171,7 @@ public class MessageHandler
      * @param prompt The prompt to show the client
      * @return Returns only the valid number the user has sent back
      */
-    public int requestNumberRange(int min, int max, String prompt)
+    public int requestNumber(String prompt, int min, int max)
     {
         int result = -1;
         Boolean invalidInput = true;
@@ -186,24 +186,38 @@ public class MessageHandler
         return result;
     }
 
-    public int handleRequestNumberRange()
+    public int handleNumberFailable()
     {
         int result = 0;
         do
         {
             result = handleRequestNumber();
-
-            // 0.4. Check bool for error
         } while (readBoolean());
         return result;
     }
 
-    public String handleRequestDate()
+    public int handleNumberFailable(String m)
+    {
+        int result = 0;
+        Boolean failed = true;
+        while (failed)
+        {
+            result = handleRequestNumber();
+            failed = readBoolean();
+            if (failed)
+            {
+                System.out.println(m);
+            }
+        }
+        return result;
+    }
+
+    public String handleDate()
     {
         String result = "";
         do
         {
-            result = handleRequestString();
+            result = handleString();
 
             // 0.4. Check bool for error
         } while (readBoolean());
@@ -232,7 +246,7 @@ public class MessageHandler
      *
      * @return What the user has input that is sent over the network
      */
-    public String handleRequestString()
+    public String handleString()
     {
         System.out.print(readString());
 

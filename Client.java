@@ -1,9 +1,7 @@
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class Client
 {
@@ -30,7 +28,7 @@ public class Client
 
         try
         {
-            System.out.println("Connected to localhost in port 2004");
+            System.out.println("Connected to localhost on port 2004");
 
             MessageHandler message = new MessageHandler(socket);
             ClientLogic logic = new ClientLogic(message);
