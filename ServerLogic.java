@@ -100,6 +100,31 @@ public class ServerLogic extends Thread
 
     private void updateBug()
     {
+        int bugID = 0;
+        Boolean inputInvalid = true;
+        while (inputInvalid)
+        {
+            bugID = message.requestNumber("BugID: "); // 6.1. BugID
+
+            for (var id : database.getBugs().keySet())
+            {
+                if (id == bugID)
+                {
+                    inputInvalid = false;
+                }
+            }
+
+            message.sendBoolean(inputInvalid);
+        }
+
+        int statusIndex = message.requestNumber("New Bug Status (0=Open, 1=Closed, 2=Assigned): ", 0, 2); // 6.2. new Bug Status
+        Status status = Status.values()[statusIndex];
+
+        Map<Integer, Bug> bugs = database.getBugs();
+
+        Bug oldBug = bugs.get(bugID);
+        Bug updatedBug = new Bug(oldBug.appName(), oldBug.dateTime(), oldBug.platform(), oldBug.description(), status, oldBug.userID());
+        bugs.put(bugID, updatedBug);
     }
 
     private void viewAllBugs()
@@ -169,7 +194,6 @@ public class ServerLogic extends Thread
         Map<Integer, Bug> bugs = database.getBugs();
 
         Bug oldBug = bugs.get(bugID);
-
         Bug updatedBug = new Bug(oldBug.appName(), oldBug.dateTime(), oldBug.platform(), oldBug.description(), oldBug.status(), userID);
         bugs.put(bugID, updatedBug);
     }

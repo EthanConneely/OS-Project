@@ -55,6 +55,8 @@ public class ClientLogic
 
     private void updateBug()
     {
+        message.handleNumberFailable(); // 6.1. BugID
+        message.handleNumberFailable(); // 6.2. New bug status
     }
 
     private void viewAllBugs()
@@ -101,7 +103,7 @@ public class ClientLogic
     private void register()
     {
         message.handleString(); // 1.1. Name
-        message.handleRequestNumber(); // 1.2. ID
+        message.handleNumber(); // 1.2. ID
         message.handleString(); // 1.3. Email
         message.handleString(); // 1.4. Department
 

@@ -191,7 +191,7 @@ public class MessageHandler
         int result = 0;
         do
         {
-            result = handleRequestNumber();
+            result = handleNumber();
         } while (readBoolean());
         return result;
     }
@@ -202,7 +202,7 @@ public class MessageHandler
         Boolean failed = true;
         while (failed)
         {
-            result = handleRequestNumber();
+            result = handleNumber();
             failed = readBoolean();
             if (failed)
             {
@@ -224,7 +224,7 @@ public class MessageHandler
         return result;
     }
 
-    public int handleRequestNumber()
+    public int handleNumber()
     {
         System.out.print(readString());
 
@@ -253,19 +253,5 @@ public class MessageHandler
         String response = scanner.nextLine();
         sendString(response);
         return response;
-    }
-
-    public Platform handleRequestPlatformEnum()
-    {
-        System.out.print(readString());
-
-        return Platform.valueOf(readString());
-    }
-
-    public Status handleRequestStatusEnum()
-    {
-        System.out.print(readString());
-
-        return Status.valueOf(readString());
     }
 }
