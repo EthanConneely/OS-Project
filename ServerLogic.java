@@ -71,27 +71,27 @@ public class ServerLogic extends Thread
     {
         switch (menuOption)
         {
-        case 1:
+            case 1:
             register();
             break;
 
-        case 2:
+            case 2:
             login();
             break;
 
-        case 3:
+            case 3:
             addBug();
             break;
 
-        case 4:
+            case 4:
             assignBug();
             break;
 
-        case 5:
+            case 5:
             viewAllBugs();
             break;
 
-        case 6:
+            case 6:
             updateBug();
             break;
 
