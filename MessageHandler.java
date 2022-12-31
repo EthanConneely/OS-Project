@@ -5,9 +5,6 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
-import Database.Platform;
-import Database.Status;
-
 public class MessageHandler
 {
     private ObjectOutputStream out;
@@ -180,7 +177,6 @@ public class MessageHandler
             result = requestNumber(prompt);
 
             invalidInput = result < min || result > max;
-
             sendBoolean(invalidInput);
         }
         return result;
@@ -189,10 +185,12 @@ public class MessageHandler
     public int handleNumberFailable()
     {
         int result = 0;
-        do
+        Boolean failed = true;
+        while (failed)
         {
             result = handleNumber();
-        } while (readBoolean());
+            failed = readBoolean();
+        }
         return result;
     }
 

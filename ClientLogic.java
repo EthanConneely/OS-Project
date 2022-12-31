@@ -10,16 +10,19 @@ public class ClientLogic
     // All the server logic
     public void Run()
     {
-        // 0.1. Print Welcome Message
-        System.out.println(message.readString());
+        while (true)
+        {
+            // 0.1. Print Welcome Message
+            System.out.println(message.readString());
 
-        // 0.2. Print Menu List
-        System.out.println(message.readString());
+            // 0.2. Print Menu List
+            System.out.println(message.readString());
 
-        // 0.3. Handle Menu on client
-        int menuOption = message.handleNumberFailable();
+            // 0.3. Handle Menu on client
+            int menuOption = message.handleNumberFailable();
 
-        handleMenu(menuOption);
+            handleMenu(menuOption);
+        }
     }
 
     private void handleMenu(int menuOption)
@@ -103,7 +106,7 @@ public class ClientLogic
     private void register()
     {
         message.handleString(); // 1.1. Name
-        message.handleNumber(); // 1.2. ID
+        message.handleNumberFailable(); // 1.2. ID
         message.handleString(); // 1.3. Email
         message.handleString(); // 1.4. Department
 

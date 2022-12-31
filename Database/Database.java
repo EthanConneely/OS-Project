@@ -62,13 +62,10 @@ public class Database
                 return true;
             }
 
-            if (false)
+            // Check if the email has an @ and .
+            if (newUser.email().indexOf("@") == -1 && newUser.email().indexOf(".") == -1)
             {
-                // Check if the email has an @ and .
-                if (newUser.email().indexOf("@") == -1 && newUser.email().indexOf(".") == -1)
-                {
-                    return true;
-                }
+                return true;
             }
 
             if (newUser.id() == user.id())
@@ -82,9 +79,11 @@ public class Database
         return false;
     }
 
-    public synchronized void addBug(String AppName, LocalDateTime DateTime, Platform Platform, String Description, Status Status)
+    public synchronized void addBug(String appName, LocalDateTime dateTime, Platform platform, String description, Status status)
     {
-        Bug newBug = new Bug(AppName, DateTime, Platform, Description, Status, 0);
+        Bug newBug = new Bug(appName, dateTime, platform, description, status, 0);
+
+        System.out.println("Added new user (AppName:" + appName + ", DateTime:" + dateTime + ", Platform:" + platform + ", department:" + description + ", Status:" + status + ")");
 
         // Make the random number be negative to avoid overlap with the users ids
         bugs.put(nextBugID, newBug);

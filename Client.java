@@ -32,10 +32,7 @@ public class Client
 
             MessageHandler message = new MessageHandler(socket);
             ClientLogic logic = new ClientLogic(message);
-            while (true)
-            {
-                logic.Run();
-            }
+            logic.Run();
         }
         catch (Exception e)
         {
