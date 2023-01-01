@@ -210,6 +210,7 @@ public class ServerLogic extends Thread
         Status status = Status.values()[statusIndex];
 
         database.addBug(appName, dateTime, platform, description, status);
+        database.save();
     }
 
     private void login()
@@ -255,6 +256,7 @@ public class ServerLogic extends Thread
         }
         else
         {
+            database.save();
             message.sendString("");
         }
     }

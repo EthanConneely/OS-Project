@@ -13,9 +13,6 @@ public class Server
     public Server()
     {
         database.load();
-
-        // Capture the shutdown event and save the database
-        Runtime.getRuntime().addShutdownHook(new Thread(database::save));
     }
 
     public void run()
@@ -28,7 +25,7 @@ public class Server
                 {
                     System.out.println("Waiting for new connection");
                     socket = serverSocket.accept();
-                    System.out.println("Connection received from " + socket.getInetAddress().getHostName() + ":" + socket.getPort());
+                    System.out.println("Connection received from " + socket.getInetAddress() + ":" + socket.getPort());
 
                     ServerLogic logic = new ServerLogic(socket, database);
                     logic.start();

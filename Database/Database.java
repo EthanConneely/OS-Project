@@ -132,7 +132,7 @@ public class Database
         }
     }
 
-    public void save()
+    public synchronized void save()
     {
         try (var file = new FileWriter(new File("./Database.csv")))
         {
