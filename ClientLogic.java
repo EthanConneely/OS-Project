@@ -52,7 +52,6 @@ public class ClientLogic
             case 6:
             updateBug();
             break;
-
         }
     }
 

@@ -83,7 +83,7 @@ public class Database
     {
         Bug newBug = new Bug(appName, dateTime, platform, description, status, 0);
 
-        System.out.println("Added new user (AppName:" + appName + ", DateTime:" + dateTime + ", Platform:" + platform + ", department:" + description + ", Status:" + status + ")");
+        System.out.println("Added new bug (AppName:" + appName + ", DateTime:" + dateTime + ", Platform:" + platform + ", department:" + description + ", Status:" + status + ")");
 
         // Make the random number be negative to avoid overlap with the users ids
         bugs.put(nextBugID, newBug);

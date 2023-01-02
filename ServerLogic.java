@@ -125,6 +125,8 @@ public class ServerLogic extends Thread
         Bug oldBug = bugs.get(bugID);
         Bug updatedBug = new Bug(oldBug.appName(), oldBug.dateTime(), oldBug.platform(), oldBug.description(), status, oldBug.userID());
         bugs.put(bugID, updatedBug);
+
+        database.save();
     }
 
     private void viewAllBugs()
@@ -148,7 +150,7 @@ public class ServerLogic extends Thread
             allBugs.append("DateTime:\t" + data.dateTime() + "\n");
             allBugs.append("Platform:\t" + data.platform() + "\n");
             allBugs.append("Description:\t" + data.description() + "\n");
-            allBugs.append("Status:\t" + data.status() + "\n");
+            allBugs.append("Status:\t\t" + data.status() + "\n");
             allBugs.append("\n");
         }
 
@@ -196,6 +198,8 @@ public class ServerLogic extends Thread
         Bug oldBug = bugs.get(bugID);
         Bug updatedBug = new Bug(oldBug.appName(), oldBug.dateTime(), oldBug.platform(), oldBug.description(), oldBug.status(), userID);
         bugs.put(bugID, updatedBug);
+
+        database.save();
     }
 
     private void addBug()
